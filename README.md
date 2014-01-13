@@ -35,7 +35,7 @@ BrokenRecord provides a configure method with two options.  Here's an example:
         config.classes_to_skip = [Foo, Bar]
 
         # BrokenRecord will call the block provided in before_scan before scanning
-        # your records.  This is useful for skipping validations you want ignore.
+        # your records.  This is useful for skipping validations you want to ignore.
         config.before_scan do
             User.skip_callback :validate, :before, :user_must_be_active
         end
