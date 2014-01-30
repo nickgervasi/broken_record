@@ -1,4 +1,5 @@
 require "broken_record/logger"
+require 'parallel'
 
 module BrokenRecord
   class Scanner

@@ -1,3 +1,4 @@
+require 'colorize'
 require 'tempfile'
 
 module BrokenRecord
