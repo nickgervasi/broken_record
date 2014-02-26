@@ -6,3 +6,7 @@
 
 * Initialize BrokenRecord::Config.before_scan_callbacks
 * Add 'require' statements needed in lazy environments
+
+## v0.0.3
+
+* Allow setting a per-model default scope
