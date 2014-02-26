@@ -50,7 +50,13 @@ module BrokenRecord
       logger.log_message "Validating model #{model}... ".ljust(70)
 
       begin
-        model.unscoped.all.each do |r|
+        if BrokenRecord::Config.default_scopes[model]
+          model_scope = BrokenRecord::Config.default_scopes[model].call
+        else
+          model_scope = model.unscoped
+        end
+
+        model_scope.find_each do |r|
           begin
             if !r.valid?
               message = "    Invalid record in #{model} id=#{r.id}."
