@@ -51,7 +51,7 @@ module BrokenRecord
 
       begin
         if BrokenRecord::Config.default_scopes[model]
-          model_scope = BrokenRecord::Config.default_scopes[model].call
+          model_scope = model.instance_exec &BrokenRecord::Config.default_scopes[model]
         else
           model_scope = model.unscoped
         end
