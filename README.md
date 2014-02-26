@@ -34,6 +34,9 @@ BrokenRecord provides a configure method with two options.  Here's an example:
         # Skip the Foo and Bar models when scanning.
         config.classes_to_skip = [Foo, Bar]
 
+        # Set a scope for which models should be validated
+        config.default_scopes = { Foo => proc { with_bars } }
+
         # BrokenRecord will call the block provided in before_scan before scanning
         # your records.  This is useful for skipping validations you want to ignore.
         config.before_scan do
