@@ -34,6 +34,9 @@ BrokenRecord provides a configure method with two options.  Here's an example:
         # Skip the Foo and Bar models when scanning.
         config.classes_to_skip = [Foo, Bar]
 
+        # Show the duration to validate each model (default false)
+        config.show_duration = true
+
         # Set a scope for which models should be validated
         config.default_scopes = { Foo => proc { with_bars } }
 

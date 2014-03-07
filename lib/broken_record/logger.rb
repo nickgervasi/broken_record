@@ -38,6 +38,10 @@ module BrokenRecord
       @stdout = ""
     end
 
+    def start_log
+      @start_time = Time.now
+    end
+
     def log_error(message)
       @stdout << "[FAIL]\n".red if @errors == 0
       @stdout << "#{message.red}\n"
@@ -50,6 +54,11 @@ module BrokenRecord
 
     def log_result
       @stdout << "[PASS]\n".green if @errors == 0
+    end
+
+    def log_duration
+      duration = (Time.now - @start_time).round(3)
+      @stdout << "\tTime: #{duration}s\n"
     end
 
     def result

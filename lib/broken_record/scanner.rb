@@ -48,6 +48,7 @@ module BrokenRecord
 
       logger = BrokenRecord::Logger.new
       logger.log_message "Validating model #{model}... ".ljust(70)
+      logger.start_log if BrokenRecord::Config.show_duration
 
       begin
         if BrokenRecord::Config.default_scopes[model]
@@ -72,6 +73,7 @@ module BrokenRecord
       end
 
       logger.log_result
+      logger.log_duration if BrokenRecord::Config.show_duration
       logger.result
     end
   end
