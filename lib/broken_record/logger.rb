@@ -16,7 +16,7 @@ module BrokenRecord
 
     def self.report_results(test_results)
       total_errors = 0
-      test_results.each { |result| total_errors += result[:errors] }
+      test_results.each { |result| total_errors += result[:error_count] }
       if total_errors == 0
         puts "\nAll models validated successfully.".green
       else
@@ -31,29 +31,55 @@ module BrokenRecord
       end
     end
 
+    def self.log(model, &block)
+      logger = new
+      logger.start_log
+      logger.log_header "Validating model #{model}... ".ljust(70)
+
+      yield(logger)
+
+      logger.log_result
+      logger.result
+    end
+
     # Instance Methods
 
     def initialize
-      @errors = 0
-      @stdout = ""
+      @header = ''
+      @errors = []
+
+      @stdout = ''
+    end
+
+    def log_header(header_message)
+      @header = header_message
+    end
+
+    def start_log
+      @start_time = Time.now
     end
 
     def log_error(message)
-      @stdout << "[FAIL]\n".red if @errors == 0
-      @stdout << "#{message.red}\n"
-      @errors += 1
-    end
-
-    def log_message(message)
-      @stdout << "#{message}"
+      @errors << "#{message.red}\n"
     end
 
     def log_result
-      @stdout << "[PASS]\n".green if @errors == 0
+      @stdout << @header
+
+      if @errors.empty?
+        @stdout << '[PASS]'.green
+      else
+        @stdout << '[FAIL]'.red
+      end
+
+      duration = (Time.now - @start_time).round(3)
+      @stdout << "  (#{duration}s)\n"
+
+      @stdout << @errors.join
     end
 
     def result
-      { stdout: @stdout, errors: @errors}
+      { stdout: @stdout, error_count: @errors.count}
     end
   end
 end

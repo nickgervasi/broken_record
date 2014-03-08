@@ -46,33 +46,29 @@ module BrokenRecord
     def validate_model(model)
       ActiveRecord::Base.connection.reconnect!
 
-      logger = BrokenRecord::Logger.new
-      logger.log_message "Validating model #{model}... ".ljust(70)
-
-      begin
-        if BrokenRecord::Config.default_scopes[model]
-          model_scope = model.instance_exec &BrokenRecord::Config.default_scopes[model]
-        else
-          model_scope = model.unscoped
-        end
-
-        model_scope.find_each do |r|
-          begin
-            if !r.valid?
-              message = "    Invalid record in #{model} id=#{r.id}."
-              r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" }
-              logger.log_error message
-            end
-          rescue Exception => msg
-            logger.log_error "    Exception for record in #{model} id=#{r.id} - #{msg}."
+      BrokenRecord::Logger.log(model) do |logger|
+        begin
+          if BrokenRecord::Config.default_scopes[model]
+            model_scope = model.instance_exec &BrokenRecord::Config.default_scopes[model]
+          else
+            model_scope = model.unscoped
           end
-        end
-      rescue Exception => msg
-        logger.log_error "    Error querying model #{model} - #{msg}."
-      end
 
-      logger.log_result
-      logger.result
+          model_scope.find_each do |r|
+            begin
+              if !r.valid?
+                message = "    Invalid record in #{model} id=#{r.id}."
+                r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" }
+                logger.log_error message
+              end
+            rescue Exception => msg
+              logger.log_error "    Exception for record in #{model} id=#{r.id} - #{msg}."
+            end
+          end
+        rescue Exception => msg
+          logger.log_error "    Error querying model #{model} - #{msg}."
+        end
+      end
     end
   end
 end
