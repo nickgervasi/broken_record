@@ -10,3 +10,7 @@
 ## v0.0.3
 
 * Allow setting a per-model default scope
+
+## v0.0.4
+
+* Show per-model test duration in log output
