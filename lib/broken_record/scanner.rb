@@ -34,9 +34,12 @@ module BrokenRecord
       objects = Set.new
       ObjectSpace.each_object(Class) do |klass|
         if ActiveRecord::Base > klass
+          # Classes to skip may either be constants or strings.  Convert all to strings for easier lookup
+          classes_to_skip = BrokenRecord::Config.classes_to_skip.map(&:to_s)
+
           # Use base_class so we don't try to validate abstract classes and so we don't validate
           # STI classes multiple times.  See active_record/inheritance.rb for more details.
-          objects.add klass.base_class unless BrokenRecord::Config.classes_to_skip.include?(klass)
+          objects.add klass.base_class unless classes_to_skip.include?(klass.to_s)
         end
       end
 
@@ -48,8 +51,10 @@ module BrokenRecord
 
       BrokenRecord::Logger.log(model) do |logger|
         begin
-          if BrokenRecord::Config.default_scopes[model]
-            model_scope = model.instance_exec &BrokenRecord::Config.default_scopes[model]
+          default_scope = BrokenRecord::Config.default_scopes[model] || BrokenRecord::Config.default_scopes[model.to_s]
+
+          if default_scope
+            model_scope = model.instance_exec &default_scope
           else
             model_scope = model.unscoped
           end
