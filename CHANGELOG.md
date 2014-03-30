@@ -14,3 +14,7 @@
 ## v0.0.5
 
 * Show per-model test duration in log output
+
+## v0.0.6
+
+* Allow classes_to_skip and default_scope keys to be strings as well as classes
