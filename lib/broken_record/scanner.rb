@@ -63,7 +63,7 @@ module BrokenRecord
               end
             rescue Exception => e
                message = "    Exception for record in #{model} id=#{r.id} - #{e}.\n"
-               message << e.backtrace[0..9].map { |line| "        #{line}"}.join("\n")
+               message << e.backtrace.map { |line| "        #{line}"}.join("\n")
                logger.log_error message
             end
           end
