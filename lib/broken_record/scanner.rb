@@ -1,31 +1,36 @@
-require "broken_record/logger"
+require 'broken_record/job'
+require 'broken_record/result_aggregator'
 require 'parallel'
 
 module BrokenRecord
   class Scanner
-    def run(model_name = nil)
-      models = models_to_validate(model_name)
+    def run(class_names)
+      classes = classes_to_validate(class_names)
 
       BrokenRecord::Config.before_scan_callbacks.each { |callback| callback.call }
 
-      results = BrokenRecord::Logger.parallel do |lock|
-        Parallel.map(models) do |model|
-          result = validate_model(model)
-          BrokenRecord::Logger.report_output(result, lock)
-          result
-        end
+      jobs = BrokenRecord::Job.build_jobs(classes)
+      aggregator = ResultAggregator.new
+
+      callback = proc do |_, _, result|
+        aggregator.add_result result if result.is_a? BrokenRecord::JobResult
       end
 
-      BrokenRecord::Logger.report_results(results)
+      Parallel.each(jobs, :finish => callback) do |job|
+        ActiveRecord::Base.connection.reconnect!
+        job.perform
+      end
+
+      aggregator.report_final_results
     end
 
     private
 
-    def models_to_validate(model_name)
-      if model_name
-        [ model_name.constantize ]
-      else
+    def classes_to_validate(class_names)
+      if class_names.empty?
         load_all_active_record_classes
+      else
+        class_names.map(&:trim).map(&:constantize)
       end
     end
 
@@ -43,38 +48,6 @@ module BrokenRecord
       end
 
       objects.sort_by(&:name)
-    end
-
-    def validate_model(model)
-      ActiveRecord::Base.connection.reconnect!
-
-      BrokenRecord::Logger.log(model) do |logger|
-        begin
-          default_scope = BrokenRecord::Config.default_scopes[model] || BrokenRecord::Config.default_scopes[model.to_s]
-
-          if default_scope
-            model_scope = model.instance_exec &default_scope
-          else
-            model_scope = model.unscoped
-          end
-
-          model_scope.find_each do |r|
-            begin
-              if !r.valid?
-                message = "    Invalid record in #{model} id=#{r.id}."
-                r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" }
-                logger.log_error message
-              end
-            rescue Exception => e
-               message = "    Exception for record in #{model} id=#{r.id} - #{e}.\n"
-               message << e.backtrace.map { |line| "        #{line}"}.join("\n")
-               logger.log_error message
-            end
-          end
-        rescue Exception => msg
-          logger.log_error "    Error querying model #{model} - #{msg}."
-        end
-      end
     end
   end
 end
