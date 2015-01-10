@@ -36,7 +36,7 @@ module BrokenRecord
             result.add_error message
           end
         rescue Exception => e
-          message = "    Exception for record in #{model} id=#{r.id} - #{e}.\n"
+          message = "    Exception for record in #{klass} id=#{r.id} - #{e}.\n"
           message << e.backtrace.map { |line| "        #{line}"}.join("\n")
           result.add_error message
         end
