@@ -18,6 +18,7 @@ module BrokenRecord
 
       Parallel.each(jobs, :finish => callback) do |job|
         ActiveRecord::Base.connection.reconnect!
+        BrokenRecord::Config.after_fork_callbacks.each { |callback| callback.call }
         job.perform
       end
 
