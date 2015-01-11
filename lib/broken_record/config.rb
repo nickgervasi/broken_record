@@ -11,7 +11,7 @@ module BrokenRecord
     end
 
     def after_fork(&block)
-      self.after_fork << block
+      self.after_fork_callbacks << block
     end
   end
 end
