@@ -31,7 +31,7 @@ module BrokenRecord
       if class_names.empty?
         load_all_active_record_classes
       else
-        class_names.map(&:trim).map(&:constantize)
+        class_names.map(&:strip).map(&:constantize)
       end
     end
 
