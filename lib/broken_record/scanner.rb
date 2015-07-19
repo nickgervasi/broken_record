@@ -8,15 +8,13 @@ module BrokenRecord
 
       BrokenRecord::Config.before_scan_callbacks.each { |callback| callback.call }
 
-      results = BrokenRecord::Logger.parallel do |lock|
+      BrokenRecord::Logger.parallel do |lock|
         Parallel.map(models) do |model|
           result = validate_model(model)
           BrokenRecord::Logger.report_output(result, lock)
           result
         end
       end
-
-      BrokenRecord::Logger.report_results(results)
     end
 
     private
