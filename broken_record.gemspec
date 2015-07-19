@@ -22,5 +22,5 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'rake', '~> 10'
   spec.add_runtime_dependency 'parallel', '~> 0'
-  spec.add_runtime_dependency 'colorize', '0.5.8'
+  spec.add_runtime_dependency 'colorize', '>= 0.5.8'
 end
