@@ -36,7 +36,7 @@ module BrokenRecord
     end
 
     def load_all_active_record_classes
-      Dir.glob(Rails.root.to_s + '/app/models/**/*.rb').each { |file| require file }
+      Dir.glob(Rails.root.to_s + '/app/models/**/*.rb').each { |file| require_dependency file }
       objects = Set.new
       # Classes to skip may either be constants or strings.  Convert all to strings for easier lookup
       classes_to_skip = BrokenRecord::Config.classes_to_skip.map(&:to_s)
