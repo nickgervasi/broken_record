@@ -4,6 +4,7 @@ namespace :broken_record do
   desc 'Scans all models for validation errors'
   task :scan, [:model_name] => :environment do |t, args|
     scanner = BrokenRecord::Scanner.new
-    scanner.run(args[:model_name])
+    results = scanner.run(args[:model_name])
+    BrokenRecord::Logger.report_results(results)
   end
 end
