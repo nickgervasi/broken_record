@@ -28,16 +28,14 @@ module BrokenRecord
     end
 
     def load_all_active_record_classes
-      Dir.glob(Rails.root.to_s + '/app/models/**/*.rb').each { |file| require file }
+      Rails.application.eager_load!
       objects = Set.new
       # Classes to skip may either be constants or strings.  Convert all to strings for easier lookup
       classes_to_skip = BrokenRecord::Config.classes_to_skip.map(&:to_s)
-      ObjectSpace.each_object(Class) do |klass|
-        if ActiveRecord::Base > klass
-          # Use base_class so we don't try to validate abstract classes and so we don't validate
-          # STI classes multiple times.  See active_record/inheritance.rb for more details.
-          objects.add klass.base_class unless classes_to_skip.include?(klass.to_s)
-        end
+      ActiveRecord::Base.descendants.each do |klass|
+        # Use base_class so we don't try to validate abstract classes and so we don't validate
+        # STI classes multiple times.  See active_record/inheritance.rb for more details.
+        objects.add klass.base_class unless classes_to_skip.include?(klass.to_s)
       end
 
       objects.sort_by(&:name)
