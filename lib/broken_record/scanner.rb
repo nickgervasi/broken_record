@@ -5,24 +5,23 @@ require 'parallel'
 module BrokenRecord
   class Scanner
     def run(class_names)
-      classes = classes_to_validate(class_names)
+      ResultAggregator.new.tap do |aggregator|
+        classes = classes_to_validate(class_names)
 
-      BrokenRecord::Config.before_scan_callbacks.each { |callback| callback.call }
+        BrokenRecord::Config.before_scan_callbacks.each { |callback| callback.call }
 
-      jobs = BrokenRecord::Job.build_jobs(classes)
-      aggregator = ResultAggregator.new
+        jobs = BrokenRecord::Job.build_jobs(classes)
 
-      callback = proc do |_, _, result|
-        aggregator.add_result result if result.is_a? BrokenRecord::JobResult
+        callback = proc do |_, _, result|
+          aggregator.add_result result if result.is_a? BrokenRecord::JobResult
+        end
+
+        Parallel.each(jobs, :finish => callback) do |job|
+          ActiveRecord::Base.connection.reconnect!
+          BrokenRecord::Config.after_fork_callbacks.each { |callback| callback.call }
+          job.perform
+        end
       end
-
-      Parallel.each(jobs, :finish => callback) do |job|
-        ActiveRecord::Base.connection.reconnect!
-        BrokenRecord::Config.after_fork_callbacks.each { |callback| callback.call }
-        job.perform
-      end
-
-      aggregator.report_final_results
     end
 
     private

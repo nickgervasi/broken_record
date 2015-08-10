@@ -6,6 +6,7 @@ namespace :broken_record do
     scanner = BrokenRecord::Scanner.new
     class_names = args[:class_name] ? [args[:class_name]] : []
     class_names += args.extras
-    scanner.run(class_names)
+    aggregator = scanner.run(class_names)
+    aggregator.report_final_results
   end
 end
