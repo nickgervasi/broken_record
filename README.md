@@ -30,15 +30,21 @@ To scan all records of all models in your project:
 rake broken_record:scan
 ```
 
-If you want to scan all records of a specific model (e.g. the User model)
+If you want to scan all records of a specific model (e.g. the User model):
 
 ```bash
 rake broken_record:scan[User]
 ```
 
+You can also specify a list of models to scan:
+
+```bash
+rake broken_record:scan[Product,User]
+```
+
 ## Configuration
 
-BrokenRecord provides a configure method with two options.  Here's an example:
+BrokenRecord provides a configure method with multiple options.  Here's an example:
 
 ```ruby
 BrokenRecord.configure do |config|
@@ -48,10 +54,17 @@ BrokenRecord.configure do |config|
     # Set a scope for which models should be validated
     config.default_scopes = { Foo => proc { with_bars } }
 
-    # BrokenRecord will call the block provided in before_scan before scanning
-    # your records.  This is useful for skipping validations you want to ignore.
+    # The follow block will be called before scanning your records.
+    # This is useful for skipping validations you want to ignore.
     config.before_scan do
         User.skip_callback :validate, :before, :user_must_be_active
+    end
+
+	# BrokenRecord uses the parallelize gem to distribute work across
+	# multiple cores. The following block will be called every time
+	# the process is forked (useful for re-establishing connections).
+	config.after_fork do
+      Rails.cache.reconnect if Rails.cache.respond_to? :reconnect
     end
 end
 ```
