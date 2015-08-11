@@ -25,28 +25,38 @@ module BrokenRecord
     end
 
     def perform
-      result = BrokenRecord::JobResult.new(self)
-      result.start_timer
+      BrokenRecord::JobResult.new(self).tap do |result|
+        result.start_timer
 
-      records.each do |r|
         begin
-          if !r.valid?
-            message = "    Invalid record in #{klass} id=#{r.id}."
-            r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" }
-            result.add_error message
+          compact_output = BrokenRecord::Config.compact_output
+          records.each do |r|
+            begin
+              if !r.valid?
+                message = "    Invalid record in #{klass} id=#{r.id}."
+                r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" } unless compact_output
+                result.add_error message
+              end
+            rescue Exception => e
+              message =
+
+              result.add_error serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output)
+            end
           end
         rescue Exception => e
-          message = "    Exception for record in #{klass} id=#{r.id} - #{e}.\n"
-          message << e.backtrace.map { |line| "        #{line}"}.join("\n")
-          result.add_error message
+          result.add_error serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output)
         end
-      end
 
-      result.stop_timer
-      result
+        result.stop_timer
+      end
     end
 
     private
+
+    def serialize_exception(message, e, compact_output)
+      message << "- #{e}.\n" << e.backtrace.map { |line| "        #{line}"}.join("\n") unless compact_output
+      message
+    end
 
     def records
       default_scope = BrokenRecord::Config.default_scopes[klass] || BrokenRecord::Config.default_scopes[klass.to_s]
