@@ -28,17 +28,20 @@ module BrokenRecord
       result = BrokenRecord::JobResult.new(self)
       result.start_timer
 
-      records.find_each do |r|
-        begin
-          if !r.valid?
-            message = "    Invalid record in #{klass} id=#{r.id}."
-            r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" }
+      bach_size = 1000
+      record_ids.each_slice(bach_size) do |id_batch|
+        model_scope.where("#{klass.table_name}.#{primary_key}" => id_batch).each do |r|
+          begin
+            if !r.valid?
+              message = "    Invalid record in #{klass} id=#{r.id}."
+              r.errors.each { |attr, msg| message << "\n        #{attr} - #{msg}" }
+              result.add_error message
+            end
+          rescue Exception => e
+            message = "    Exception for record in #{klass} id=#{r.id} - #{e}.\n"
+            message << e.backtrace.map { |line| "        #{line}" }.join("\n")
             result.add_error message
           end
-        rescue Exception => e
-          message = "    Exception for record in #{klass} id=#{r.id} - #{e}.\n"
-          message << e.backtrace.map { |line| "        #{line}"}.join("\n")
-          result.add_error message
         end
       end
 
@@ -48,18 +51,24 @@ module BrokenRecord
 
     private
 
-    def records
+    def primary_key
+      klass.primary_key
+    end
+
+    def record_ids
+      records_per_group = (model_scope.count / self.class.jobs_per_class.to_f).ceil
+      scope = model_scope.offset(records_per_group * index)
+      scope.limit(records_per_group).pluck(primary_key)
+    end
+
+    def model_scope
       default_scope = BrokenRecord::Config.default_scopes[klass] || BrokenRecord::Config.default_scopes[klass.to_s]
 
-      model_scope = if default_scope
+      if default_scope
         klass.instance_exec &default_scope
       else
         klass.unscoped
       end
-
-      records_per_group = (model_scope.count / self.class.jobs_per_class.to_f).ceil
-      scope = model_scope.offset(records_per_group * index)
-      model_scope.where("#{klass.table_name}.#{klass.primary_key}" => scope.limit(records_per_group).pluck(:id))
     end
   end
 end
