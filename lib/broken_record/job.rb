@@ -28,7 +28,7 @@ module BrokenRecord
       result = BrokenRecord::JobResult.new(self)
       result.start_timer
 
-      records.each do |r|
+      records.find_each do |r|
         begin
           if !r.valid?
             message = "    Invalid record in #{klass} id=#{r.id}."
@@ -57,10 +57,9 @@ module BrokenRecord
         klass.unscoped
       end
 
-      records_per_group = model_scope.count / self.class.jobs_per_class
+      records_per_group = (model_scope.count / self.class.jobs_per_class.to_f).ceil
       scope = model_scope.offset(records_per_group * index)
-
-      index == Parallel.processor_count - 1 ? scope.load : scope.first(records_per_group)
+      model_scope.where("#{klass.table_name}.#{klass.primary_key}" => scope.limit(records_per_group).pluck(:id))
     end
   end
 end
