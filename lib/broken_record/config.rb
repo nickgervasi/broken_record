@@ -1,3 +1,5 @@
+require_dependency 'broken_record/result_aggregator'
+
 module BrokenRecord
   module Config
     extend self
