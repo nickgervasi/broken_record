@@ -5,7 +5,7 @@ require 'parallel'
 module BrokenRecord
   class Scanner
     def run(class_names)
-      ResultAggregator.new.tap do |aggregator|
+      BrokenRecord::Config.aggregator_klass.constantize.new.tap do |aggregator|
         classes = classes_to_validate(class_names)
 
         BrokenRecord::Config.before_scan_callbacks.each { |callback| callback.call }
