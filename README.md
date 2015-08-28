@@ -60,12 +60,16 @@ BrokenRecord.configure do |config|
         User.skip_callback :validate, :before, :user_must_be_active
     end
 
-	# BrokenRecord uses the parallelize gem to distribute work across
-	# multiple cores. The following block will be called every time
-	# the process is forked (useful for re-establishing connections).
-	config.after_fork do
+    # BrokenRecord uses the parallelize gem to distribute work across
+    # multiple cores. The following block will be called every time
+    # the process is forked (useful for re-establishing connections).
+    config.after_fork do
       Rails.cache.reconnect if Rails.cache.respond_to? :reconnect
     end
+
+    # The compact_output option will report the ids of invalid records
+    # but it will omit any relevant messages or backtraces.
+    config.compact_output = true
 end
 ```
 
