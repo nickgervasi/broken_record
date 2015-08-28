@@ -7,7 +7,7 @@ module BrokenRecord
     self.after_fork_callbacks = []
     self.default_scopes = {}
     self.compact_output = false
-    self.aggregator_klass = 'BrokenRecord::ResultAggregator'
+    self.aggregator_class = 'BrokenRecord::ResultAggregator'
 
     def before_scan(&block)
       self.before_scan_callbacks << block
