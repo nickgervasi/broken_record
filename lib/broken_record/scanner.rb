@@ -1,6 +1,8 @@
 require 'broken_record/job'
+require 'broken_record/job_scheduler'
+require 'broken_record/parallel_job_scheduler'
+require 'broken_record/external_job_scheduler'
 require 'broken_record/result_aggregator'
-require 'parallel'
 
 module BrokenRecord
   class Scanner
@@ -10,17 +12,10 @@ module BrokenRecord
 
         BrokenRecord::Config.before_scan_callbacks.each { |callback| callback.call }
 
-        jobs = BrokenRecord::Job.build_jobs(classes)
-
-        callback = proc do |_, _, result|
-          aggregator.add_result result if result.is_a? BrokenRecord::JobResult
-        end
-
-        Parallel.each(jobs, :finish => callback) do |job|
-          ActiveRecord::Base.connection.reconnect!
-          BrokenRecord::Config.after_fork_callbacks.each { |callback| callback.call }
-          job.perform
-        end
+        scheduler_class = BrokenRecord::Config.job_scheduler_class.constantize
+        raise "Invalid job scheduler" unless scheduler_class.ancestors.include?(BrokenRecord::JobScheduler)
+        scheduler = scheduler_class.new(classes, aggregator, BrokenRecord::Config.job_scheduler_options)
+        scheduler.run
       end
     end
 

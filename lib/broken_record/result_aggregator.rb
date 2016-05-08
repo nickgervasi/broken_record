@@ -8,25 +8,10 @@ module BrokenRecord
     def add_result(result)
       @aggregated_results[result.job.klass] ||= []
       @aggregated_results[result.job.klass] << result
-
-      if klass_done?(result.job.klass)
-        report_results result.job.klass
-      end
     end
 
-    def report_final_results
-      if @total_errors == 0
-        puts "\nAll models validated successfully.".green
-      else
-        puts "\n#{@total_errors} errors were found while running validations.".red
-        exit 1
-      end
-    end
-
-    private
-
-    def klass_done?(klass)
-      @aggregated_results[klass].count == Job.jobs_per_class
+    def count(klass)
+      @aggregated_results[klass].count
     end
 
     def report_results(klass)
@@ -45,6 +30,15 @@ module BrokenRecord
       end
       print "  (#{duration}s)\n"
       print all_errors.join if all_errors.any?
+    end
+
+    def report_final_results
+      if @total_errors == 0
+        puts "\nAll models validated successfully.".green
+      else
+        puts "\n#{@total_errors} errors were found while running validations.".red
+        exit 1
+      end
     end
   end
 end
