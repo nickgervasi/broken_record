@@ -15,6 +15,8 @@ module BrokenRecord
     end
 
     def report_results(klass)
+      result_count = BrokenRecord::Config.default_result_count
+
       all_errors = @aggregated_results[klass].map(&:errors).flatten
       start_time = @aggregated_results[klass].map(&:start_time).min
       end_time = @aggregated_results[klass].map(&:end_time).max
@@ -29,7 +31,11 @@ module BrokenRecord
         print '[FAIL]'.red
       end
       print "  (#{duration}s)\n"
-      print all_errors.join if all_errors.any?
+
+      if all_errors.any?
+        print "#{all_errors.length} errors were found while running validations for #{klass}\n"
+        print all_errors[0..result_count-1].join
+      end
     end
 
     def report_final_results
