@@ -43,8 +43,11 @@ module BrokenRecord
         puts "\nAll models validated successfully.".green
       else
         puts "\n#{@total_errors} errors were found while running validations.".red
-        exit 1
       end
+    end
+
+    def success?
+      @total_errors == 0
     end
   end
 end

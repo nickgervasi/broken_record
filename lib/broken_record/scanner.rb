@@ -3,6 +3,7 @@ require 'broken_record/job_scheduler'
 require 'broken_record/parallel_job_scheduler'
 require 'broken_record/external_job_scheduler'
 require 'broken_record/result_aggregator'
+require 'broken_record/slack_aggregator'
 
 module BrokenRecord
   class Scanner

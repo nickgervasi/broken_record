@@ -3,7 +3,7 @@ module BrokenRecord
     extend self
     attr_accessor :classes_to_skip, :before_scan_callbacks, :after_fork_callbacks,
                   :default_scopes, :default_result_count, :compact_output, :aggregator_class,
-                  :job_scheduler_class, :job_scheduler_options
+                  :job_scheduler_class, :job_scheduler_options, :slack_options
 
     self.before_scan_callbacks = []
     self.after_fork_callbacks = []
@@ -13,6 +13,7 @@ module BrokenRecord
     self.aggregator_class = 'BrokenRecord::ResultAggregator'
     self.job_scheduler_class = 'BrokenRecord::ParallelJobScheduler'
     self.job_scheduler_options = {}
+    self.slack_options = {}
 
     def before_scan(&block)
       self.before_scan_callbacks << block
