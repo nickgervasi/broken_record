@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'rake', '>= 10.1.10'
   spec.add_runtime_dependency 'parallel', '>= 1.2.3'
   spec.add_runtime_dependency 'colorize', '>= 0.5.8'
+  spec.add_runtime_dependency 'dogapi', '~> 1'
 end

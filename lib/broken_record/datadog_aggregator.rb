@@ -17,9 +17,12 @@ module BrokenRecord
     private
 
     def client
-      @client ||= Dogapi::Client.new(
-        BrokenRecord::Config.datadog_api_key
-      )
+      @client ||= begin
+        require 'dogapi'
+        Dogapi::Client.new(
+          BrokenRecord::Config.datadog_api_key
+        )
+      end
     end
 
     def default_tags
