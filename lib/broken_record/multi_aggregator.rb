@@ -11,6 +11,10 @@ module BrokenRecord
       @aggregators.first.count(klass)
     end
 
+    def success?
+      @aggregators.first.success?
+    end
+
     def method_missing(method, *args, &block)
       @aggregators.map do |a|
         a.send(method, *args, &block)
