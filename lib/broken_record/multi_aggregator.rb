@@ -12,7 +12,7 @@ module BrokenRecord
     end
 
     def success?
-      @aggregators.first.success?
+      @aggregators.all?(&:success?)
     end
 
     def method_missing(method, *args, &block)
