@@ -22,12 +22,12 @@ module BrokenRecord
                   r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" } unless compact_output
                   result.add_error message
                 end
-              rescue Exception => e
+              rescue => e
                 result.add_error serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output)
               end
             end
           end
-        rescue Exception => e
+        rescue => e
           result.add_error serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output)
         end
 
