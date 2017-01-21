@@ -23,7 +23,8 @@ module BrokenRecord
                   result.add_error message
                 end
               rescue => e
-                result.add_error serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output)
+                error_message = "    Exception for record in #{klass} id=#{r.id} - #{e.class} #{e.message}"
+                result.add_error serialize_exception(error_message, e, compact_output)
               end
             end
           end
