@@ -13,12 +13,5 @@ module BrokenRecord
 
       File.open('broken_records_results.json', 'w') { |f| f.puts(JSON.generate(json)) }
     end
-
-    private
-
-    def all_invalid_ids(klass)
-      @aggregated_results[klass].record_ids
-    end
-
   end
 end
