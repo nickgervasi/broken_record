@@ -3,7 +3,6 @@ require 'spec_helper'
 module BrokenRecord
   describe JsonAggregator do
     let(:json_aggregator) { JsonAggregator.new }
-    let(:job) { Job.new(klass:Object) }
     let(:object_result0) { JobResult.new(Job.new(klass:Object)) }
     let(:object_result1) { JobResult.new(Job.new(klass:Object)) }
     let(:object_result1) { JobResult.new(Job.new(klass:Object)) }
