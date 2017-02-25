@@ -17,8 +17,10 @@ module BrokenRecord
       print "  (#{duration}s)\n"
 
       if all_errors.any?
-        print "#{all_errors.length} errors were found while running validations for #{klass}\n"
-        print all_errors[0..result_count-1].join
+        puts "#{all_errors.length} errors were found while running validations for #{klass}\n"
+        puts "Invalid ids: #{all_errors.keys.inspect}"
+        puts "Validation errors on first #{result_count} invalid models"
+        puts all_errors.values[0..result_count-1].join
       end
     end
 

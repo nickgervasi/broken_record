@@ -4,7 +4,7 @@ module BrokenRecord
 
     def initialize(job)
       @job = job
-      @errors = []
+      @errors = {}
     end
 
     def start_timer
@@ -15,8 +15,8 @@ module BrokenRecord
       @end_time = Time.now
     end
 
-    def add_error(error)
-      @errors << "#{error.red}\n"
+    def add_error(id, error)
+      @errors[id] = "#{error.red}\n"
     end
   end
 end

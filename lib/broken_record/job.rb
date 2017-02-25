@@ -20,7 +20,7 @@ module BrokenRecord
                 if !r.valid?
                   message = "    Invalid record in #{klass} id=#{r.id}."
                   r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" } unless compact_output
-                  result.add_error message
+                  result.add_error r.id, message
                 end
               rescue => e
                 error_message = "    Exception for record in #{klass} id=#{r.id} - #{e.class} #{e.message}"

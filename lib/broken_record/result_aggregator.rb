@@ -29,7 +29,7 @@ module BrokenRecord
     private
 
     def all_errors(klass)
-      @aggregated_results[klass].map(&:errors).flatten
+      @aggregated_results[klass].map(&:errors).flatten.reduce(&:merge)
     end
 
     def duration(klass)
