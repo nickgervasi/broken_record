@@ -1,3 +1,3 @@
 module BrokenRecord
-  VERSION = '0.2.5.gusto'
+  VERSION = '0.2.6.gusto'
 end

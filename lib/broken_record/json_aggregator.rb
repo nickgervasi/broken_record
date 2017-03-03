@@ -2,6 +2,9 @@ require 'json'
 
 module BrokenRecord
   class JsonAggregator < ResultAggregator
+    
+    FILENAME = 'broken_record_results.json'
+    
     def report_final_results
       json = @aggregated_results.reduce({}) do |acc, (klass, job_results)|
         acc[klass.name] = {
@@ -11,7 +14,7 @@ module BrokenRecord
         acc
       end
 
-      File.open('broken_records_results.json', 'w') { |f| f.puts(JSON.generate(json)) }
+      File.open(FILENAME, 'w') { |f| f.puts(JSON.generate(json)) }
     end
   end
 end
