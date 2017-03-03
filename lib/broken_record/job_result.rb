@@ -1,10 +1,10 @@
 module BrokenRecord
   class JobResult
-    attr_reader :start_time, :end_time, :errors, :job
+    attr_reader :start_time, :end_time, :job, :normalized_errors
 
     def initialize(job)
       @job = job
-      @errors = []
+      @normalized_errors = []
     end
 
     def start_timer
@@ -15,8 +15,14 @@ module BrokenRecord
       @end_time = Time.now
     end
 
-    def add_error(error)
-      @errors << "#{error.red}\n"
+    def add_error(id, error_type, message)
+      @normalized_errors << { id: id, message: message, error_type: error_type }
+    end
+
+    def errors
+      @normalized_errors.map do |error|
+        "#{error[:message].red}\n"
+      end
     end
   end
 end
