@@ -20,15 +20,26 @@ module BrokenRecord
                 if !r.valid?
                   message = "    Invalid record in #{klass} id=#{r.id}."
                   r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" } unless compact_output
-                  result.add_error r.id, 'Invalid Record', message
+                  result.add_error(
+                    id: r.id,
+                    error_type: 'Invalid Record',
+                    message: message
+                  )
                 end
               rescue Exception => e
-                result.add_error r.id, 'Validation Exception', serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output)
+                result.add_error(
+                  id: r.id,
+                  error_type: 'Validation Exception',
+                  message: serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output)
+                )
               end
             end
           end
         rescue Exception => e
-          result.add_error r.id, 'Loading Exception', serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output)
+          result.add_error(
+            error_type: 'Loading Exception',
+            message: serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output)
+          )
         end
 
         result.stop_timer

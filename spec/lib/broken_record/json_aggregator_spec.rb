@@ -9,20 +9,20 @@ module BrokenRecord
     let(:object_result1) { JobResult.new(Job.new(klass:Object)) }
     let(:string_result0) { JobResult.new(Job.new(klass:String)) }
     let(:string_result1) { JobResult.new(Job.new(klass:String)) }
-    let(:json_file) { 'broken_records_results.json' }
+    let(:json_file) { 'broken_record_results.json' }
     describe '#report_final_results' do
       before(:each) do
         object_result0.start_timer
         object_result0.stop_timer
-        object_result0.add_error(1, 'Invalid Record', 'Missing Title')
+        object_result0.add_error(id: 1, error_type: 'Invalid Record', message: 'Missing Title')
 
         object_result1.start_timer
         object_result1.stop_timer
-        object_result1.add_error(0, 'Exception', 'Something is wrong')
+        object_result1.add_error(id: 0, error_type: 'Exception', message: 'Something is wrong')
 
         string_result0.start_timer
         string_result0.stop_timer
-        string_result0.add_error(0, 'Invalid Record', 'F word detected')
+        string_result0.add_error(error_type: 'Loading Error', message: 'Whaaaat!')
 
         string_result1.start_timer
         string_result1.stop_timer
@@ -48,12 +48,12 @@ module BrokenRecord
           'String'=> {
             'duration'=>0.0,
             'invalid_records'=>[
-              [{'id'=>0, 'message'=>'F word detected', 'error_type'=>'Invalid Record'}]
+              [{'id'=>nil, 'message'=>'Whaaaat!', 'error_type'=>'Loading Error'}]
             ]
           }
         }
         expect(File).to exist(json_file)
-        File.open('broken_records_results.json').each do |line|
+        File.open(json_file).each do |line|
           expect(JSON.parse(line)).to eql(errors)
         end
         File.delete(json_file)

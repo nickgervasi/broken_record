@@ -15,7 +15,7 @@ module BrokenRecord
       @end_time = Time.now
     end
 
-    def add_error(id, error_type, message)
+    def add_error(id: nil, error_type:, message:)
       @normalized_errors << { id: id, message: message, error_type: error_type }
     end
 
