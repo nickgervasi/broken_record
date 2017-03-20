@@ -28,6 +28,7 @@ module BrokenRecord
                                                   {id:nil, message:'Whaaaaat!', error_type:'Loading Error'}
                                                  ])
       expect(job_result.errors).to eq(["\e[1;31mMissing Title\e[0m\n", "\e[1;31mMissing Name\e[0m\n", "\e[1;31mWhaaaaat!\e[0m\n"])
+      expect(job_result.error_ids).to eq([1, 2])
     end
   end
 end

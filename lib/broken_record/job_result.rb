@@ -24,5 +24,11 @@ module BrokenRecord
         "#{error[:message].red}\n"
       end
     end
+
+    def error_ids
+      @normalized_errors.map do |error|
+        error[:id]
+      end.compact
+    end
   end
 end

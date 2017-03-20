@@ -6,6 +6,7 @@ module BrokenRecord
       result_count = BrokenRecord::Config.default_result_count
 
       all_errors = all_errors(klass)
+      all_error_ids = all_error_ids(klass)
       duration = duration(klass)
 
       print "Validating model #{klass}... ".ljust(70)
@@ -18,7 +19,7 @@ module BrokenRecord
 
       if all_errors.any?
         puts "#{all_errors.length} errors were found while running validations for #{klass}\n"
-        puts "Invalid ids: #{all_errors.keys.inspect}"
+        puts "Invalid ids: #{all_error_ids.inspect}"
         puts "Validation errors on first #{result_count} invalid models"
         puts all_errors.values[0..result_count-1].join
       end
