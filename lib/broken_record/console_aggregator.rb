@@ -21,7 +21,7 @@ module BrokenRecord
         puts "#{all_errors.length} errors were found while running validations for #{klass}\n"
         puts "Invalid ids: #{all_error_ids.inspect}"
         puts "Validation errors on first #{result_count} invalid models"
-        puts all_errors.values[0..result_count-1].join
+        puts all_errors.join
       end
     end
 
