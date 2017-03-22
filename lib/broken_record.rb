@@ -8,6 +8,12 @@ module BrokenRecord
 
   def configure
     yield BrokenRecord::Config
+
+    unless BrokenRecord::Config.default_scopes.blank?
+      ActiveSupport::Deprecation.warn("default_scopes are deprecated and will be removed in the next major version.")
+      BrokenRecord::Config.model_includes = BrokenRecord::Config.default_scopes
+      BrokenRecord::Config.model_conditions = BrokenRecord::Config.default_scopes
+    end
   end
 end
 

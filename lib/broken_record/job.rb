@@ -15,7 +15,7 @@ module BrokenRecord
           batch_size = 1000
           compact_output = BrokenRecord::Config.compact_output
           record_ids.each_slice(batch_size) do |id_batch|
-            model_scope.where("#{klass.table_name}.#{primary_key}" => id_batch).each do |r|
+            models_with_includes.where("#{klass.table_name}.#{primary_key}" => id_batch).each do |r|
               begin
                 if !r.valid?
                   message = "    Invalid record in #{klass} id=#{r.id}."
@@ -58,16 +58,23 @@ module BrokenRecord
     end
 
     def record_ids
-      records_per_group = (model_scope.count / parallelization.to_f).ceil
-      scope = model_scope.offset(records_per_group * index)
+      records_per_group = (models_with_conditions.count / parallelization.to_f).ceil
+      scope = models_with_conditions.offset(records_per_group * index)
       scope.limit(records_per_group).pluck(primary_key)
     end
 
-    def model_scope
-      default_scope = BrokenRecord::Config.default_scopes[klass] || BrokenRecord::Config.default_scopes[klass.to_s]
+    def models_with_includes
+      apply_scope(BrokenRecord::Config.model_includes)
+    end
 
-      if default_scope
-        klass.instance_exec &default_scope
+    def models_with_conditions
+      apply_scope(BrokenRecord::Config.model_conditions)
+    end
+
+    def apply_scope(scopes)
+      applicable_scope = scopes[klass] || scopes[klass.to_s]
+      if applicable_scope
+        klass.instance_exec &applicable_scope
       else
         klass.unscoped
       end
