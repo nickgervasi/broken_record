@@ -28,6 +28,14 @@ module BrokenRecord
 
     private
 
+    def all_classes
+      @aggregated_results.keys
+    end
+
+    def all_results
+      @aggregated_results.values.flatten
+    end
+
     def all_errors(klass)
        @aggregated_results[klass].flat_map(&:errors)
     end
