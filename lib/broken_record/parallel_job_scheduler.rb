@@ -8,12 +8,11 @@ module BrokenRecord
       finish_callback = proc do |_, _, result|
         if result.is_a? BrokenRecord::JobResult
           result_aggregator.add_result(result)
-
-          if result_aggregator.count(result.job.klass) == jobs_per_class
-            result_aggregator.report_results(result.job.klass)
-          end
+          result_aggregator.report_results(result.job.klass)
         end
       end
+
+      result_aggregator.report_job_start
 
       Parallel.each(jobs, { finish: finish_callback }) do |job|
         ActiveRecord::Base.connection.reconnect!
@@ -23,18 +22,9 @@ module BrokenRecord
     end
 
     private
-    def jobs_per_class
-      JOBS_PER_PROCESSOR * Parallel.processor_count
-    end
 
     def jobs
-      jobs = []
-      classes.each do |klass|
-        jobs_per_class.times do |index|
-          jobs << Job.new(klass: klass, index: index, parallelization: jobs_per_class)
-        end
-      end
-      jobs
+      classes.map { |klass| Job.new(klass: klass) }
     end
   end
 end

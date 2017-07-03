@@ -2,10 +2,10 @@ require 'broken_record/job_result'
 
 module BrokenRecord
   class Job
-    attr_accessor :klass, :index, :parallelization
+    attr_accessor :klass
 
-    def initialize(options)
-      options.each { |k, v| send("#{k}=", v) }
+    def initialize(klass:)
+      self.klass = klass
     end
 
     def perform
@@ -23,14 +23,16 @@ module BrokenRecord
                   result.add_error(
                     id: r.id,
                     error_type: 'Invalid Record',
-                    message: message
+                    message: message,
+                    errors: r.errors
                   )
                 end
               rescue Exception => e
                 result.add_error(
                   id: r.id,
                   error_type: 'Validation Exception',
-                  message: serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output)
+                  message: serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output),
+                  exception: e
                 )
               end
             end
@@ -38,7 +40,8 @@ module BrokenRecord
         rescue Exception => e
           result.add_error(
             error_type: 'Loading Exception',
-            message: serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output)
+            message: serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output),
+            exception: e
           )
         end
 
@@ -58,9 +61,7 @@ module BrokenRecord
     end
 
     def record_ids
-      records_per_group = (models_with_conditions.count / parallelization.to_f).ceil
-      scope = models_with_conditions.offset(records_per_group * index)
-      scope.limit(records_per_group).pluck(primary_key)
+      models_with_conditions.pluck(primary_key)
     end
 
     def models_with_includes

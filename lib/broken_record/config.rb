@@ -5,7 +5,7 @@ module BrokenRecord
                   :default_scopes, :model_includes, :model_conditions, :default_result_count,
                   :compact_output, :aggregator_class, :job_scheduler_class,
                   :job_scheduler_options, :slack_options, :datadog_api_key,
-                  :multi_aggregator_classes
+                  :multi_aggregator_classes, :bugsnag_api_key, :prioritized_models
 
     self.before_scan_callbacks = []
     self.after_fork_callbacks = []
@@ -20,6 +20,8 @@ module BrokenRecord
     self.job_scheduler_options = {}
     self.slack_options = {}
     self.datadog_api_key = ENV['DATADOG_API_KEY']
+    self.bugsnag_api_key = ENV['BUGSNAG_API_KEY']
+    self.prioritized_models = []
 
     def before_scan(&block)
       self.before_scan_callbacks << block

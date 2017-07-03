@@ -1,3 +1,4 @@
+require 'broken_record/class_finder'
 require 'broken_record/job'
 require 'broken_record/job_scheduler'
 require 'broken_record/parallel_job_scheduler'
@@ -8,6 +9,7 @@ require 'broken_record/datadog_aggregator'
 require 'broken_record/console_aggregator'
 require 'broken_record/json_aggregator'
 require 'broken_record/multi_aggregator'
+require 'broken_record/bugsnag_aggregator'
 
 module BrokenRecord
   class Scanner
@@ -27,25 +29,7 @@ module BrokenRecord
     private
 
     def classes_to_validate(class_names)
-      if class_names.empty?
-        load_all_active_record_classes
-      else
-        class_names.map(&:strip).map(&:constantize)
-      end
-    end
-
-    def load_all_active_record_classes
-      Rails.application.eager_load!
-      objects = Set.new
-      # Classes to skip may either be constants or strings.  Convert all to strings for easier lookup
-      classes_to_skip = BrokenRecord::Config.classes_to_skip.map(&:to_s)
-      ActiveRecord::Base.descendants.each do |klass|
-        # Use base_class so we don't try to validate abstract classes and so we don't validate
-        # STI classes multiple times.  See active_record/inheritance.rb for more details.
-        objects.add klass.base_class unless classes_to_skip.include?(klass.to_s)
-      end
-
-      objects.sort_by(&:name)
+      ClassFinder.new(class_names).classes_to_validate
     end
   end
 end

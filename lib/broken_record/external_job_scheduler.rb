@@ -10,6 +10,8 @@ module BrokenRecord
         end
       end
 
+      result_aggregator.report_job_start
+
       # Don't run in parallel, just utilize the callback functionality of the parallel gem
       Parallel.each(jobs, { finish: finish_callback, in_processes: 0 }) do |job|
         job.perform
@@ -18,9 +20,11 @@ module BrokenRecord
 
     private
     def jobs
-      classes.map do |klass|
-        Job.new(klass: klass, index: options[:job_index], parallelization: options[:jobs_total])
+      jobs = []
+      classes.each.with_index do |klass, i|
+        jobs << Job.new(klass: klass) if i % options[:jobs_total] == options[:job_index]
       end
+      jobs
     end
   end
 end

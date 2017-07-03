@@ -18,6 +18,10 @@ module BrokenRecord
       @total_errors += all_errors(klass).count
     end
 
+    def report_job_start
+      # No-op: Define in subclass
+    end
+
     def report_final_results
       # No-op: Define in subclass
     end

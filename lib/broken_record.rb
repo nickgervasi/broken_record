@@ -1,3 +1,4 @@
+require 'broken_record/patches/active_model_validators'
 require "broken_record/version"
 require "broken_record/config"
 require "broken_record/scanner"
