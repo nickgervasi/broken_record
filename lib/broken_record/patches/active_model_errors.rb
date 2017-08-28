@@ -42,4 +42,4 @@ module BrokenRecord
   end
 end
 
-ActiveModel::Errors.send(:prepend, BrokenRecord::Patches::ErrorTracker)
+ActiveModel::Errors.send(:prepend, BrokenRecord::Patches::ErrorTracker) if defined? ActiveModel

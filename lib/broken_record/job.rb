@@ -1,7 +1,8 @@
-require 'broken_record/job_result'
+require 'broken_record/reportable_error'
 
 module BrokenRecord
   class Job
+
     attr_accessor :klass
 
     def initialize(klass:)
@@ -13,36 +14,27 @@ module BrokenRecord
         result.start_timer
         begin
           batch_size = 1000
-          compact_output = BrokenRecord::Config.compact_output
           record_ids.each_slice(batch_size) do |id_batch|
             models_with_includes.where("#{klass.table_name}.#{primary_key}" => id_batch).each do |r|
               begin
                 if !r.valid?
-                  message = "    Invalid record in #{klass} id=#{r.id}."
-                  r.errors.each { |attr,msg| message <<  "\n        #{attr} - #{msg}" } unless compact_output
-                  result.add_error(
-                    id: r.id,
-                    error_type: 'Invalid Record',
-                    message: message,
-                    errors: r.errors
-                  )
+                  r.errors.error_mappings.each do |error_message, error_mapping|
+                    stacktrace = Array(error_mapping[:source])
+
+                    result.add_error(
+                      BrokenRecord::ReportableError.new(r.id, error_message, error_mapping[:context], stacktrace)
+                    )
+                  end
                 end
               rescue Exception => e
+                stacktrace = BrokenRecord::ReportableError.prettify_stacktrace(e.backtrace, e)
+
                 result.add_error(
-                  id: r.id,
-                  error_type: 'Validation Exception',
-                  message: serialize_exception("    Exception for record in #{klass} id=#{r.id} ", e, compact_output),
-                  exception: e
+                  BrokenRecord::ReportableError.new(r.id, "#{e.class} - #{e.message}", stacktrace[0], stacktrace)
                 )
               end
             end
           end
-        rescue Exception => e
-          result.add_error(
-            error_type: 'Loading Exception',
-            message: serialize_exception("    Exception while trying to load models for #{klass}.", e, compact_output),
-            exception: e
-          )
         end
 
         result.stop_timer
@@ -50,11 +42,6 @@ module BrokenRecord
     end
 
     private
-
-    def serialize_exception(message, e, compact_output)
-      message << "- #{e}.\n" << e.backtrace.map { |line| "        #{line}"}.join("\n") unless compact_output
-      message
-    end
 
     def primary_key
       klass.primary_key

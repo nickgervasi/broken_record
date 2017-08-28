@@ -18,4 +18,4 @@ module BrokenRecord
   end
 end
 
-ActiveModel::Validator.send(:prepend, BrokenRecord::Patches::ValidatorTracker)
+ActiveModel::Validator.send(:prepend, BrokenRecord::Patches::ValidatorTracker) if defined? ActiveModel

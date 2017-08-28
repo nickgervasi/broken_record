@@ -1,4 +1,5 @@
 # BrokenRecord
+[![Build status](https://badge.buildkite.com/b2a7685afb59070c272eebf79d0763789896c627508e181a77.svg)](https://buildkite.com/gusto/broken-record)
 
 Provides a rake task for scanning your ActiveRecord models and detecting validation errors.
 
