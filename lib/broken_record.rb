@@ -18,7 +18,6 @@ module BrokenRecord
     end
 
     unless BrokenRecord::Config.aggregator_class.nil?
-      warn_class_string_deprecation('aggregator_class')
       ActiveSupport::Deprecation.warn(
         "aggregator_class is deprecated and will be removed in the next major version.
         Please use aggregator, e.g. :console"
