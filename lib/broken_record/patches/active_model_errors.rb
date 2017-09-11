@@ -35,8 +35,29 @@ module BrokenRecord
         super(attribute, message, options)
       end
 
+      # This produces a list of error message, error mapping pairs.
+      # ActiveRecord, in some cases, will automatically try to validate associated models when you call valid on
+      # the base model.  As such, the actual `error_mapping` instance variable will be on the associated model.
+      # It will create an error key that looks like `base.associated_model`, so we find the associated model that way
+      # to get the error mapping instance variable and create the full error_mappings pair list.
       def error_mappings
-        values.flatten.map { |error_message| [error_message, @error_mapping[error_message]] }
+        error_pairs = []
+        each do |key, mapping_key|
+          delineated_keys = key.to_s.split('.')
+
+          mapping = @error_mapping
+          error_message = mapping_key.dup
+          if (delineated_keys.length > 1)
+            parent = delineated_keys.first
+            associated_model = @base.send(parent)
+            mapping = associated_model.errors.instance_variable_get(:@error_mapping)
+            error_message = "#{associated_model.class} (#{associated_model.id}): #{error_message}"
+          end
+
+          error_pairs << [error_message, mapping[mapping_key]]
+        end
+
+        error_pairs
       end
     end
   end
