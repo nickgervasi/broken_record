@@ -30,7 +30,7 @@ module BrokenRecord
         all_results.each{ |result| console_aggregator.add_result(result) }
         # Store the output of the console aggregator into a StringIO object
         validation_logger = StringIO.new
-        snippet = all_classes.each { |klass| console_aggregator.report_results(klass, logger: validation_logger) }
+        all_classes.each { |klass| console_aggregator.report_results(klass, logger: validation_logger) }
 
         if !success?
           notifier.send_snippet!(validation_logger.string.uncolorize, 'Model Validation Failures')

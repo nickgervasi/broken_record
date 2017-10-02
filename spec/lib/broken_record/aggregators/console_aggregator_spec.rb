@@ -10,17 +10,18 @@ module BrokenRecord::Aggregators
       let(:klass) { String }
       subject { console_aggregator.report_results(klass, logger: logger) }
 
-      context 'number of invalid results exceeds the configured default_result_count' do
-        before do
-          allow(BrokenRecord::Config).to receive(:default_result_count).and_return(5)
-        end
-        it 'outputs the correct validation data to the logger' do
-          subject
-          expected = <<-eos
+      context 'invalid models' do
+        context 'number of invalid results exceeds the configured default_result_count' do
+          before do
+            allow(BrokenRecord::Config).to receive(:default_result_count).and_return(5)
+          end
+          it 'outputs the correct validation data to the logger' do
+            subject
+            expected = <<-eos
 Running validations for String...                                     \e[0;31;49m[FAIL]\e[0m  (0.234s)
-3 errors were found while running validations for String
+3 errors were found on 3 models while running validations for String
 Invalid ids: [3, 4, 5]
-Validation errors on first 3 invalid models
+First 3 errors
 \e[0;31;49m    Invalid record in String id=3.
         invalid String model 3\e[0m
 \e[0;31;49m    Invalid record in String id=4.
@@ -28,28 +29,53 @@ Validation errors on first 3 invalid models
 \e[0;31;49m    Invalid record in String id=5.
         invalid String model 5\e[0m
 eos
-          expect(logger.string).to eq expected
+            expect(logger.string).to eq expected
+          end
         end
-      end
 
-      context 'number of invalid results is less than the configured default_result_count' do
-        before do
-          allow(BrokenRecord::Config).to receive(:default_result_count).and_return(2)
-        end
-        it 'outputs the correct validation data to the logger' do
-          subject
+        context 'number of invalid results is less than the configured default_result_count' do
+          before do
+            allow(BrokenRecord::Config).to receive(:default_result_count).and_return(2)
+          end
+          it 'outputs the correct validation data to the logger' do
+            subject
           expected = <<-eos
 Running validations for String...                                     \e[0;31;49m[FAIL]\e[0m  (0.234s)
-3 errors were found while running validations for String
+3 errors were found on 3 models while running validations for String
 Invalid ids: [3, 4, 5]
-Validation errors on first 2 invalid models
+First 2 errors
 \e[0;31;49m    Invalid record in String id=3.
         invalid String model 3\e[0m
 \e[0;31;49m    Invalid record in String id=4.
         invalid String model 4\e[0m
 eos
+            expect(logger.string).to eq expected
+          end
+        end
 
-          expect(logger.string).to eq expected
+        context 'some models have multiple errors' do
+          before do
+            stubbed_error = create_invalid_model_error_stub(string_result0.errors.first.id, String)
+            string_result0.add_error(stubbed_error)
+          end
+          it 'outputs the correct validation data to the logger' do
+            subject
+          expected = <<-eos
+Running validations for String...                                     \e[0;31;49m[FAIL]\e[0m  (0.234s)
+4 errors were found on 3 models while running validations for String
+Invalid ids: [3, 4, 5]
+First 4 errors
+\e[0;31;49m    Invalid record in String id=3.
+        invalid String model 3\e[0m
+\e[0;31;49m    Invalid record in String id=4.
+        invalid String model 4\e[0m
+\e[0;31;49m    Invalid record in String id=5.
+        invalid String model 5\e[0m
+\e[0;31;49m    Invalid record in String id=3.
+        invalid String model 3\e[0m
+eos
+            expect(logger.string).to eq expected
+          end
         end
       end
     end

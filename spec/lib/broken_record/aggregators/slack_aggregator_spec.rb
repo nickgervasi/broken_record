@@ -18,32 +18,16 @@ module BrokenRecord::Aggregators
       context 'errors' do
         include_context 'aggregator setup'
         it 'outputs the correct validation data to the snippet' do
-          expected_snippet = <<-eos
-Running validations for Object...                                     [FAIL]  (25.0s)
-1 errors were found while running validations for Object
-Invalid ids: [1]
-Validation errors on first 1 invalid models
-    Invalid record in Object id=1.
-        invalid Object model 1
-Running validations for Array...                                      [FAIL]  (11.0s)
-1 errors were found while running validations for Array
-Invalid ids: [2]
-Validation errors on first 1 invalid models
-    Invalid record in Array id=2.
-        invalid Array model 2
-Running validations for String...                                     [FAIL]  (0.234s)
-3 errors were found while running validations for String
-Invalid ids: [3, 4, 5]
-Validation errors on first 3 invalid models
-    Invalid record in String id=3.
-        invalid String model 3
-    Invalid record in String id=4.
-        invalid String model 4
-    Invalid record in String id=5.
-        invalid String model 5
-eos
+          expect_any_instance_of(BrokenRecord::Aggregators::ConsoleAggregator)
+            .to receive(:report_results).with(String, logger: an_instance_of(StringIO))
+          expect_any_instance_of(BrokenRecord::Aggregators::ConsoleAggregator)
+            .to receive(:report_results).with(Object, logger: an_instance_of(StringIO))
+          expect_any_instance_of(BrokenRecord::Aggregators::ConsoleAggregator)
+            .to receive(:report_results).with(Array, logger: an_instance_of(StringIO))
+
+          expect_any_instance_of(StringIO).to receive_message_chain(:string, :uncolorize).and_return('stubbed failures')
           expect(slack_notifier).to receive(:send!).with("\n5 errors were found while running validations.")
-          expect(slack_notifier).to receive(:send_snippet!).with(expected_snippet, 'Model Validation Failures')
+          expect(slack_notifier).to receive(:send_snippet!).with('stubbed failures', 'Model Validation Failures')
           subject
         end
       end
