@@ -25,9 +25,9 @@ module BrokenRecord
         ActiveRecord::Base.descendants.each do |klass|
           next if classes_to_skip.include?(klass.to_s)
 
-          # Skip any abstract classes, since they do not have
-          # any models to validate directly.
-          next if klass.try(:abstract_class?)
+          # Skip abstract classes since they do not have
+          # any records we can validate.
+          next if klass.abstract_class?
 
           # Use base_class so we don't validate STI classes multiple times.
           # See active_record/inheritance.rb for more details.
