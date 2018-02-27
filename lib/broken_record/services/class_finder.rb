@@ -14,15 +14,24 @@ module BrokenRecord
       end
 
       private
+
       def load_all_active_record_classes
         Rails.application.eager_load!
         objects = Set.new
-        # Classes to skip may either be constants or strings.  Convert all to strings for easier lookup
+        # Classes to skip may either be constants or strings.
+        # Convert all to strings for easier lookup
         classes_to_skip = BrokenRecord::Config.classes_to_skip.map(&:to_s)
+
         ActiveRecord::Base.descendants.each do |klass|
-          # Use base_class so we don't try to validate abstract classes and so we don't validate
-          # STI classes multiple times.  See active_record/inheritance.rb for more details.
-          objects.add klass.base_class unless classes_to_skip.include?(klass.to_s)
+          next if classes_to_skip.include?(klass.to_s)
+
+          # Skip abstract classes since they do not have
+          # any records we can validate.
+          next if klass.abstract_class?
+
+          # Use base_class so we don't validate STI classes multiple times.
+          # See active_record/inheritance.rb for more details.
+          objects.add klass.base_class
         end
 
         prioritized_classes = BrokenRecord::Config.prioritized_models
