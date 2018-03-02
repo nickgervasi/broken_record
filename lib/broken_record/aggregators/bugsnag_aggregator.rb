@@ -50,7 +50,12 @@ module BrokenRecord
       private
 
       def notify(exception, options)
-        Bugsnag.notify(exception, options)
+        Bugsnag.notify(exception) do |report|
+          report.context = options[:context]
+          report.grouping_hash = options[:grouping_hash]
+
+          report.add_tab(:custom, options.slice(:ids, :error_count, :message, :class))
+        end
       end
 
       def notify_deploy
