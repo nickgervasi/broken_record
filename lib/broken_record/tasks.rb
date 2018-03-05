@@ -8,5 +8,7 @@ namespace :broken_record do
     class_names += args.extras
     aggregator = scanner.run(class_names)
     aggregator.report_final_results
+
+    exit 1 unless aggregator.success?
   end
 end

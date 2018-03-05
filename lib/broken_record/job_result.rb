@@ -1,6 +1,7 @@
 module BrokenRecord
   class JobResult
-    attr_reader :start_time, :end_time, :errors, :job
+
+    attr_reader :start_time, :end_time, :job, :errors
 
     def initialize(job)
       @job = job
@@ -16,7 +17,7 @@ module BrokenRecord
     end
 
     def add_error(error)
-      @errors << "#{error.red}\n"
+      @errors << error
     end
   end
 end
