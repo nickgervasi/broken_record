@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'colorize', '>= 0.8.1'
   spec.add_runtime_dependency 'dogapi', '~> 1'
   spec.add_runtime_dependency 'bugsnag', '~> 6.6', '>= 6.6.4'
+  spec.add_runtime_dependency 'bugsnag-capistrano', '~> 1.1', '>= 1.1.1'
 end
