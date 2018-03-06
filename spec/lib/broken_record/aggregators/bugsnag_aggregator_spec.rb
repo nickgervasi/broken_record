@@ -3,7 +3,30 @@ module BrokenRecord::Aggregators
     let(:bugsnag_aggregator) { BugsnagAggregator.new }
     let(:logger) { StringIO.new }
 
+    # Shared context variables
     let(:aggregator) { bugsnag_aggregator }
+
+    describe '#report_job_start' do
+      include_context 'aggregator setup'
+      subject(:report_job_start) { bugsnag_aggregator.report_job_start }
+
+      context 'when bugsnag_api_key is not set' do
+        it 'raises an error' do
+          expect { report_job_start }.to raise_error BugsnagAggregator::BUGSNAG_API_KEY_ERROR
+        end
+      end
+
+      context 'when bugsnag_api_key is set' do
+        before { allow(BrokenRecord::Config).to receive(:bugsnag_api_key).and_return('api_key') }
+
+        it 'configures and notifies bugsnag' do
+
+          expect(Bugsnag).to receive(:configure)
+          expect(Bugsnag::Capistrano::Deploy).to receive(:notify)
+          report_job_start
+        end
+      end
+    end
 
     describe '#report_results' do
       include_context 'aggregator setup'
