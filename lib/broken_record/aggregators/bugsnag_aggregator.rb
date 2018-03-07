@@ -1,4 +1,5 @@
 require 'bugsnag'
+require 'bugsnag-capistrano/deploy'
 
 module BrokenRecord
   class InvalidRecordException < StandardError; end
@@ -8,6 +9,7 @@ module BrokenRecord
     class BugsnagAggregator < ResultAggregator
 
       MAX_IDS = 500
+      BUGSNAG_API_KEY_ERROR = 'Bugsnag API Key must be set!'.freeze
 
       def report_job_start
         configure_bugsnag!
@@ -58,15 +60,22 @@ module BrokenRecord
         end
       end
 
+      # This does not mean you need Capistrano for deploy, but since Bugsnag 6.0, they removed
+      # the native deploy notifications, and instead of using the REST API we are using Bugsnag's
+      # recommended solution for notifying from rake tasks by using the `bugsnag-capistrano` gem.
+      # Instead of requiring the tasks however, we are requiring the Deploy class which the
+      # built-in rake tasks are using.
+      #
+      # [Rake Upgrade Docs](https://docs.bugsnag.com/api/deploy-tracking/rake/)
       def notify_deploy
-        Bugsnag::Deploy.notify(
+        Bugsnag::Capistrano::Deploy.notify(
           repository: ENV['BROKEN_RECORD_REPOSITORY'],
           branch: ENV['BROKEN_RECORD_BRANCH']
         )
       end
 
       def configure_bugsnag!
-        raise 'Bugsnag API Key must be set!' unless BrokenRecord::Config.bugsnag_api_key
+        raise BUGSNAG_API_KEY_ERROR unless BrokenRecord::Config.bugsnag_api_key
 
         Bugsnag.configure do |c|
           c.notify_release_stages = ['production']
