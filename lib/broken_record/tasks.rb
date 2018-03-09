@@ -9,6 +9,6 @@ namespace :broken_record do
     aggregator = scanner.run(class_names)
     aggregator.report_final_results
 
-    exit 1 unless aggregator.success?
+    aggregator.exit_program
   end
 end
