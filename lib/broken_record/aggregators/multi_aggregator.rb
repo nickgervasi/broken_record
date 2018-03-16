@@ -16,6 +16,16 @@ module BrokenRecord
         @aggregators.all?(&:success?)
       end
 
+      def exit_program
+        bugsnag_aggregator = @aggregators.find { |a| a.is_a?(BugsnagAggregator) }
+
+        if bugsnag_aggregator
+          bugsnag_aggregator.exit_program
+        else
+          exit(success? ? 0 : 1)
+        end
+      end
+
       def method_missing(method, *args, &block)
         @aggregators.map do |a|
           a.send(method, *args, &block)

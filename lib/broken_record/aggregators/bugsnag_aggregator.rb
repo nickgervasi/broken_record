@@ -49,6 +49,10 @@ module BrokenRecord
         end
       end
 
+      def exit_program
+        exit(0)
+      end
+
       private
 
       def notify(exception, options)

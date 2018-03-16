@@ -34,6 +34,10 @@ module BrokenRecord
         results_for_class(klass).errors.count
       end
 
+      def exit_program
+        exit(success? ? 0 : 1)
+      end
+
       private
 
       def total_error_count
