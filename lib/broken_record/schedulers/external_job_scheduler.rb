@@ -15,6 +15,7 @@ module BrokenRecord
 
         # Don't run in parallel, just utilize the callback functionality of the parallel gem
         Parallel.each(jobs, { finish: finish_callback, in_processes: 0 }) do |job|
+          ActiveRecord::Base.connection.reconnect!
           job.perform
         end
       end
